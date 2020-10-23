@@ -53,18 +53,20 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Android.Support.Design">
-      <Version>28.0.0.1</Version>
+      <Version>28.0.0.3</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
-      <Version>4.0.0.482894</Version>
+      <Version>4.8.0.1451</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ElegantTabRenderer.cs" />
     <Compile Include="Extension.cs" />
+    <Compile Include="FontDrawable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidAsset Include="Assets\materialdesignicons-webfont.ttf" />
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -73,5 +75,6 @@
       <Name>ElegantTabs.Abstraction</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

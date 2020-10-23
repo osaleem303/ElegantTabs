@@ -13,6 +13,9 @@ using System.Linq;
 using Android.Support.Design.Internal;
 using Xamarin.Forms;
 using Android.Support.Design.BottomNavigation;
+using Android.Graphics;
+using Android.Graphics.Drawables;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace ElegantTabs.Droid
 {
@@ -70,21 +73,37 @@ namespace ElegantTabs.Droid
                         var icon = Transforms.GetSelectedIcon(page);
                         if (string.IsNullOrWhiteSpace(icon))
                         {
-                            menu.GetItem(i).SetIcon(IdFromTitle(page.IconImageSource ?? page.Icon, ResourceManager.DrawableClass));
+
+                            //Draw Label Icon
+                            if (page.IconImageSource is FontImageSource)
+                                menu.GetItem(i).SetIcon(DrawableFromFont(page.IconImageSource, BarSelectedItemColor));
+                            else if (page.IconImageSource is FileImageSource)
+                                menu.GetItem(i).SetIcon(IdFromTitle(page.IconImageSource ?? page.Icon, ResourceManager.DrawableClass));
                         }
                         else
                         {
-                            menu.GetItem(i).SetIcon(IdFromTitle(icon, ResourceManager.DrawableClass));
+                            //Draw Label Icon
+                            if (page.IconImageSource is FontImageSource)
+                                menu.GetItem(i).SetIcon(DrawableFromFont(page.IconImageSource, BarSelectedItemColor));
+                            else if (page.IconImageSource is FileImageSource)
+                                menu.GetItem(i).SetIcon(IdFromTitle(page.IconImageSource ?? page.Icon, ResourceManager.DrawableClass));
                         }
                     }
                     else
                     {
-                        menu.GetItem(i).SetIcon(IdFromTitle(page.IconImageSource ?? page.Icon, ResourceManager.DrawableClass));
+                        if (page.IconImageSource is FontImageSource)
+                            menu.GetItem(i).SetIcon(DrawableFromFont(page.IconImageSource, BarSelectedItemColor));
+                        else if (page.IconImageSource is FileImageSource)
+                            menu.GetItem(i).SetIcon(IdFromTitle(page.IconImageSource ?? page.Icon, ResourceManager.DrawableClass));
                     }
                 }
                 else
                 {
-                    menu.GetItem(i).SetIcon(IdFromTitle(page.IconImageSource ?? page.Icon, ResourceManager.DrawableClass));
+                    //Draw Label Icon
+                    if (page.IconImageSource is FontImageSource)
+                        menu.GetItem(i).SetIcon(DrawableFromFont(page.IconImageSource, Xamarin.Forms.Color.Transparent));
+                    else if(page.IconImageSource is FileImageSource)
+                        menu.GetItem(i).SetIcon(IdFromTitle(page.IconImageSource ?? page.Icon, ResourceManager.DrawableClass));
                 }
             }
             UpdateTabs();
@@ -92,26 +111,24 @@ namespace ElegantTabs.Droid
 
         private int IdFromTitle(ImageSource imageSource, Type type)
         {
-            if (imageSource is FileImageSource)
-            {
-                string name = System.IO.Path.GetFileNameWithoutExtension((FileImageSource)imageSource);
-                int id = GetId(type, name);
-                return id;
-            }
-            else if (imageSource is FontImageSource)
-            {
-                throw new Exception("FontImageSource not yet supported");
-            }
-            else if (imageSource is StreamImageSource)
-            {
-                throw new Exception("StreamImageSource not yet supported");
-            }
-            else
-            {
-                //imageSource will be UriImageSource
-                throw new Exception("UriImageSource not yet supported");
-            }
+            string name = System.IO.Path.GetFileNameWithoutExtension((FileImageSource)imageSource);
+            int id = GetId(type, name);
+            return id;
             
+        }
+
+        private Drawable DrawableFromFont(ImageSource imageSource, Xamarin.Forms.Color selectedItemColor)
+        {
+            var fontImage = imageSource as FontImageSource;
+            Typeface typeFace = Typeface.CreateFromAsset(context.Assets, fontImage.FontFamily.Split('#')[0]);
+            FontDrawable drawable = null;
+            if(selectedItemColor != Xamarin.Forms.Color.Transparent)
+                drawable = new FontDrawable(context, fontImage.Glyph, typeFace, Android.Graphics.Color.ParseColor(selectedItemColor.ToHex()), fontImage.Size);
+            else
+                drawable = new FontDrawable(context, fontImage.Glyph, typeFace, Android.Graphics.Color.ParseColor(fontImage.Color.ToHex()), fontImage.Size);
+            if (fontImage.Size != 30)
+                drawable.sizePx(Convert.ToInt32(fontImage.Size));
+            return drawable;
         }
 
         public new bool OnNavigationItemSelected(IMenuItem item)
